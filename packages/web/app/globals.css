@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  color: #000;
+  background: #fff;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+header svg {
+  image-rendering: crisp-edges;
+}
+
+.logo {
+  transition: transform 0.05s;
+}
+.logo:hover {
+  transform: scale(.9);
+}

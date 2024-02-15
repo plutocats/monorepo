@@ -1,0 +1,27 @@
+{
+  "name": "art",
+  "version": "1.0.0",
+  "description": "plutocats assets",
+  "main": "index.ts",
+  "scripts": {
+    "generate": "npx tsx ./scripts/generatePNGs.ts",
+    "encode": "npx tsx ./scripts/encode.ts",
+    "populateGallery": "npx tsx ./scripts/populateGallery.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Unlicense",
+  "devDependencies": {
+    "npx": "^10.2.2",
+    "tsx": "^4.7.0"
+  },
+  "dependencies": {
+    "@ethersproject/bignumber": "^5.7.0",
+    "@ethersproject/solidity": "^5.7.0",
+    "@nouns/sdk": "^0.4.0",
+    "@types/pngjs": "^6.0.4",
+    "pngjs": "^7.0.0",
+    "sharp": "^0.33.2",
+    "viem": "^2.6.1"
+  }
+}
