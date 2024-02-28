@@ -13,4 +13,5 @@ interface IPlutocatsTokenMinimal {
     function isApprovedOrOwner(address _account, uint256 _tokenId) external view returns (bool);
     function getPriorVotes(address account, uint256 blockNumber) external view returns (uint96);
     function adjustedTotalSupply() external view returns (uint256);
+    function setGovernor(address _governor) external;
 }

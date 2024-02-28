@@ -27,6 +27,10 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       initialBaseFeePerGas: 0,
+      forking: {
+        enabled: true,
+        url: `https://sepolia.blast.io`,
+      }
     },
     blast_sepolia: {
       url: 'https://sepolia.blast.io',

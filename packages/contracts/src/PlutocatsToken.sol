@@ -5,6 +5,7 @@
 pragma solidity >=0.8.0;
 
 import {ERC721} from "nouns-monorepo/packages/nouns-contracts/contracts/base/ERC721.sol";
+import {IBlast} from "./interfaces/IBlast.sol";
 import {ERC721Checkpointable} from "nouns-monorepo/packages/nouns-contracts/contracts/base/ERC721Checkpointable.sol";
 import {IPlutocatsDescriptorMinimal} from "./interfaces/IPlutocatsDescriptorMinimal.sol";
 import {IPlutocatsSeeder} from "./interfaces/IPlutocatsSeeder.sol";
@@ -44,29 +45,44 @@ contract PlutocatsToken is IPlutocatsToken, ERC721Checkpointable, LinearVRGDA, O
     // IPFS content hash of contract-level metadata.
     string private _contractURIHash = "TODO";
 
-    /// Require that the sender is the reserve.
-    modifier onlyReserve() {
-        if (msg.sender != reserve) {
-            revert OnlyReserve();
-        }
-
-        _;
-    }
+    /// The address of the pre-deployed Blast contract.
+    address public constant BLAST_PREDEPLOY_ADDRESS = 0x4300000000000000000000000000000000000002;
+    IBlast public blast;
 
     /// MEOWMEOWMEOW
-    constructor(uint256 _mintStart, address _reserve, address _descriptor, address _seeder, bool _enableReservePrice)
+    constructor(
+        uint256 _mintStart,
+        address _reserve,
+        address _descriptor,
+        address _seeder,
+        bool _enableReservePrice,
+        address _blast
+    )
         ERC721("Plutocats", "PCAT")
         LinearVRGDA(
-            1e18, // target price (1 ETH)
-            0.1e18, // decay percent (10%)
-            1e18 // per time unit (1 day)
+            0.1e18, // Target price
+            0.07e18, // Price decay percent
+            10e18 // Per time unit
         )
     {
+        require(_reserve != address(0), "PlutocatsToken: reserve address cannot be 0");
+        require(_descriptor != address(0), "PlutocatsToken: descriptor address cannot be 0");
+        require(_seeder != address(0), "PlutocatsToken: seeder address cannot be 0");
+
         MINT_START = _mintStart;
         reserve = _reserve;
         descriptor = IPlutocatsDescriptorMinimal(_descriptor);
         seeder = IPlutocatsSeeder(_seeder);
         enableReservePrice = _enableReservePrice;
+
+        if (_blast != address(0)) {
+            blast = IBlast(_blast);
+        } else {
+            blast = IBlast(BLAST_PREDEPLOY_ADDRESS);
+        }
+
+        // capture blast gas for future use
+        blast.configureClaimableGas();
     }
 
     /// IPFS uri for contract-level metadata.
@@ -174,5 +190,13 @@ contract PlutocatsToken is IPlutocatsToken, ERC721Checkpointable, LinearVRGDA, O
     function setReservePrice(bool _enableReservePrice) external onlyOwner {
         enableReservePrice = _enableReservePrice;
         emit ReservePriceSet(_enableReservePrice);
+    }
+
+    /// Sets the blast governor for this contract. If phase 2 is implemented, the
+    /// DAO will be able to claim the gas of this contract for use. Only callable
+    /// if this contract is still the governor.
+    function setGovernor(address _governor) external onlyOwner {
+        blast.configureGovernor(_governor);
+        emit SetBlastGovernor(_governor);
     }
 }

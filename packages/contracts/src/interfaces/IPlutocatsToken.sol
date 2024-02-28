@@ -19,6 +19,7 @@ interface IPlutocatsToken is IERC721 {
     event DescriptorUpdated(address indexed newDescriptor);
     event SeederUpdated(address indexed newSeeder);
     event ReservePriceSet(bool on);
+    event SetBlastGovernor(address indexed governor);
 
     error InsufficientFundsProvided();
     error DescriptorIsLocked();

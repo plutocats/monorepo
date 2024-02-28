@@ -5,6 +5,7 @@
 pragma solidity >=0.8.0;
 
 import {IBlast} from "./interfaces/IBlast.sol";
+import {IBlastPoints} from "./interfaces/IBlastPoints.sol";
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
@@ -24,7 +25,14 @@ contract PlutocatsReserve is IReserve, ReentrancyGuardUpgradeable, OwnableUpgrad
 
     constructor() initializer {}
 
-    function initialize(address _cats, address _owner, address _blast) external initializer {
+    function initialize(address _cats, address _owner, address _blast, address _blastPoints, address _pointsOperator)
+        external
+        initializer
+    {
+        require(_cats != address(0), "PlutocatsReserve: cats address cannot be 0");
+        require(_blastPoints != address(0), "PlutocatsReserve: blast points address cannot be 0");
+        require(_pointsOperator != address(0), "PlutocatsReserve: points operator address cannot be 0");
+
         __ReentrancyGuard_init();
         __Ownable_init();
 
@@ -34,7 +42,12 @@ contract PlutocatsReserve is IReserve, ReentrancyGuardUpgradeable, OwnableUpgrad
             blast = IBlast(BLAST_PREDEPLOY_ADDRESS);
         }
 
-        blast.configureClaimableYield();
+        // by default this contract earns automatic yield. claimable yield can be
+        // configured if the blast governor is updated.
+        blast.configureAutomaticYield();
+        blast.configureClaimableGas();
+        IBlastPoints(_blastPoints).configurePointsOperator(_pointsOperator);
+
         cats = IPlutocatsTokenMinimal(_cats);
 
         if (_owner != address(0)) {
@@ -72,20 +85,12 @@ contract PlutocatsReserve is IReserve, ReentrancyGuardUpgradeable, OwnableUpgrad
         recipient.sendValue(ethToSend);
     }
 
-    /// Sets the blast governor and releases this contract from any ownership.
-    /// Note a call to this function is final and cannot be undone.
+    /// Sets the blast governor for this contract. The new governor can configure the
+    /// yield mode of this contract once set. Only callable if this contract is
+    /// still the governor.
     function setGovernor(address _governor) external onlyOwner {
         blast.configureGovernor(_governor);
         emit SetBlastGovernor(_governor);
-    }
-
-    /// Claim all yield for the reserve. Can be called by anyone. Note if a new
-    /// governor is configured for the reserve this function is no longer callable
-    /// and yield can only be claimed by the configured Blast governor.
-    function claimAllYield() external {
-        address _this = address(this);
-        uint256 amount = blast.claimAllYield(_this, _this);
-        emit YieldClaimed(amount, _this);
     }
 
     /// Reverts when `msg.sender` is not the owner of this contract.

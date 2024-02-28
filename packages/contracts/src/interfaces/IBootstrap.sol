@@ -49,5 +49,5 @@ interface IBootstrap {
 
     event ProposalCreated(address indexed newOwner, uint256 startBlock, uint256 endTime, uint256 quorum);
     event VoteCast(address indexed voter, address indexed newOwner, uint8 support, uint256 votes);
-    event SettledVotes(address indexed newOwner, uint256 support);
+    event SettledVotes(address indexed newOwner, uint256 support, bool governanceLocked);
 }

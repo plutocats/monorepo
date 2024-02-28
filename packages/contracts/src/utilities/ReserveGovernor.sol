@@ -6,14 +6,14 @@
 /// malicious members.
 ///
 /// A proposal is open for 7 days and requires a minimum quorum to pass. If a proposal
-/// passes, the reserve's Blast governor is set and all contract ownership is transfered
-/// to the address in the proposal.
+/// passes, the reserve and token's Blast governor is set, while all contract ownership is transfered
+/// to the new owner address defined in the proposal.
 ///
-/// Although a tradeoff in flexibility, this is a simple and sufficiently decentralized way
-/// to migrate the project to a DAO structure if the community decides to.
+/// Although a tradeoff in flexibility, this is a simple and sufficiently
+/// decentralized way to migrate the project to a DAO structure if the community decides to.
 ///
-/// Note: The Blast governor is an address that is allowed to claim a contract’s yield and gas.
-/// In this case the Plutocats reserve.
+/// Note: The Blast governor is an address that is allowed to configure or claim
+/// a contract’s yield and gas.
 
 pragma solidity >=0.8.0;
 
@@ -54,6 +54,11 @@ contract ReserveGovernor is IBootstrap, Ownable {
     }
 
     constructor(address _votingToken, address _descriptor, address _reserve, uint256 _quorumBps) {
+        require(_votingToken != address(0), "ReserveGovernor: voting token address cannot be 0");
+        require(_descriptor != address(0), "ReserveGovernor: descriptor address cannot be 0");
+        require(_reserve != address(0), "ReserveGovernor: reserve address cannot be 0");
+        require(_quorumBps > 0, "ReserveGovernor: quorum must be greater than 0");
+
         votingToken = IPlutocatsTokenMinimal(_votingToken);
         reserve = IReserve(_reserve);
         quorumBps = _quorumBps;
@@ -154,13 +159,14 @@ contract ReserveGovernor is IBootstrap, Ownable {
         if (support == 1 && quorumMet) {
             governanceLocked = true;
             reserve.setGovernor(_newOwner);
+            votingToken.setGovernor(_newOwner);
 
             Ownable(address(reserve)).transferOwnership(_newOwner);
             Ownable(address(votingToken)).transferOwnership(_newOwner);
             Ownable(descriptor).transferOwnership(_newOwner);
         }
 
-        emit SettledVotes(_newOwner, support);
+        emit SettledVotes(_newOwner, support, governanceLocked);
     }
 
     /// Helper used to calculate quorum required to pass a proposal.

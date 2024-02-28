@@ -17,6 +17,8 @@ function getInitializerData(contractInterface: any, args: any) {
 task('deploy', 'Deploys NFTDescriptor, PlutocatsDescriptor, PlutocatsSeeder, and PlutocatsToken')
     .addFlag('autodeploy', 'Deploy all contracts without user interaction')
     .addFlag('includepredeploy', 'Include blast predeploy')
+    .addParam('blastpoints', 'The address of the blast points contract', undefined, types.string, false)
+    .addParam('blastpointsoperator', 'The address of the blast points operator', undefined, types.string, false)
     .addOptionalParam(
         'mintStart',
         'The time to enable minting. Defaults to the current time.',
@@ -29,7 +31,7 @@ task('deploy', 'Deploys NFTDescriptor, PlutocatsDescriptor, PlutocatsSeeder, and
         false,
         types.boolean,
     )
-    .setAction(async ({ autodeploy, includepredeploy, mintStart, silent }, { ethers }) => {
+    .setAction(async ({ autodeploy, includepredeploy, mintStart, silent, blastpoints, blastpointsoperator }, { ethers }) => {
         const PLUTOCATS_ART_NONCE_OFFSET = includepredeploy ? 5 : 4;
         const PLUTOCATS_RESERVE_NONCE_OFFSET = includepredeploy ? 9 : 8;
         const PLUTOCATS_RESERVE_GOVERNOR_NONCE_OFFSET = includepredeploy ? 10 : 9;
@@ -89,7 +91,10 @@ task('deploy', 'Deploys NFTDescriptor, PlutocatsDescriptor, PlutocatsSeeder, and
                     expectedPlutocatsReserveAddress,
                     () => deployment.PlutocatsDescriptor.address,
                     () => deployment.PlutocatsSeeder.address,
-                    true
+                    true,
+                    () => {
+                        return includepredeploy ? deployment.MockBlast.address : ethers.constants.AddressZero;
+                    },
                 ],
             },
             PlutocatsReserve: {
@@ -105,7 +110,9 @@ task('deploy', 'Deploys NFTDescriptor, PlutocatsDescriptor, PlutocatsSeeder, and
                         [
                             deployment.PlutocatsToken.address,
                             expectedReserveGovernorAddress,
-                            includepredeploy ? deployment.MockBlast.address : ethers.constants.AddressZero
+                            includepredeploy ? deployment.MockBlast.address : ethers.constants.AddressZero,
+                            blastpoints,
+                            blastpointsoperator, // blast points operator
                         ]
                     )
                 ],

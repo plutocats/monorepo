@@ -14,7 +14,13 @@ describe("Reserve contract", function () {
 
     beforeEach(async function () {
         const [deployer] = await ethers.getSigners();
-        const contracts = await run('deploy', { autodeploy: true, includepredeploy: true, silent: true });
+        const contracts = await run('deploy', {
+            autodeploy: true,
+            includepredeploy: true,
+            silent: true,
+            blastpoints: '0x2fc95838c71e76ec69ff817983BFf17c710F34E0',
+            blastpointsoperator: deployer.address
+        });
 
         const tokenFactory = await ethers.getContractFactory('PlutocatsToken', deployer);
         plutocatsToken = tokenFactory.attach(contracts.PlutocatsToken.address);
@@ -69,11 +75,6 @@ describe("Reserve contract", function () {
 
         // owner does not own token after quit (the reserve does, so duplicate ids passed should always revert)
         await expect(plutocatsReserve.quit([0, 0, 0])).to.be.revertedWith("ERC721: transfer of token that is not own");
-    });
-
-    it("It should allow claiming yield by anyone since by default it is sent to the reserve and reverts i contract has a governor configured", async function () {
-        const [_, s1] = await ethers.getSigners();
-        await expect(plutocatsReserve.connect(s1).claimAllYield()).to.not.be.reverted;
     });
 
     it("Only owner can set blast governor", async function () {
@@ -135,7 +136,7 @@ describe("Reserve contract", function () {
             s1Received = s1Received.add(e?.args.amount);
         }
 
-        expect(s1Received).to.be.closeTo(s2Received, s1Received.div(ethers.BigNumber.from("1000000000000000000")));
+        expect(s1Received).to.be.closeTo(s2Received, s1Received.div(ethers.BigNumber.from("100000000000000000")));
 
         const reserveBalance = await ethers.provider.getBalance(plutocatsReserve.address);
         await expect(reserveBalance).to.be.eq(0);

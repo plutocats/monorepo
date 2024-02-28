@@ -17,7 +17,13 @@ describe("Token contract", function () {
 
     beforeEach(async function () {
         const [deployer] = await ethers.getSigners();
-        const contracts = await run('deploy', { autodeploy: true, includepredeploy: true, silent: false });
+        const contracts = await run('deploy', {
+            autodeploy: true,
+            includepredeploy: true,
+            silent: true,
+            blastpoints: '0x2fc95838c71e76ec69ff817983BFf17c710F34E0',
+            blastpointsoperator: deployer.address
+        });
 
         const tokenFactory = await ethers.getContractFactory('PlutocatsToken', deployer);
         plutocatsToken = tokenFactory.attach(contracts.PlutocatsToken.address);

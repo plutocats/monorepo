@@ -17,7 +17,13 @@ describe("ReserveGovernor and Bootstrap process", function () {
 
     beforeEach(async function () {
         const [deployer] = await ethers.getSigners();
-        const contracts = await run('deploy', { autodeploy: true, includepredeploy: true, silent: true });
+        const contracts = await run('deploy', {
+            autodeploy: true,
+            includepredeploy: true,
+            silent: true,
+            blastpoints: '0x2fc95838c71e76ec69ff817983BFf17c710F34E0',
+            blastpointsoperator: deployer.address
+        });
 
         const tokenFactory = await ethers.getContractFactory('PlutocatsToken', deployer);
         plutocatsToken = tokenFactory.attach(contracts.PlutocatsToken.address);
@@ -133,7 +139,7 @@ describe("ReserveGovernor and Bootstrap process", function () {
         expect(prop.quorum).to.be.eq(ethers.BigNumber.from("5"));
     });
 
-    it('Can repropose if failed', async function () {
+    it('Can repropose if failed and ownership is transferred after settlement', async function () {
         const signers = await ethers.getSigners();
 
         for (let i = 0; i < 5; i++) {
@@ -158,6 +164,11 @@ describe("ReserveGovernor and Bootstrap process", function () {
         expect(prop.quorum).to.be.gt(0);
         expect(prop.endTime).to.be.gte(sevendays);
         expect(prop.endTime).to.be.lt(eightdays);
+
+        // zero weight votes don't count
+        await reserveGovernor.connect(signers[6]).vote(newOwner.address, 1);
+        prop = await reserveGovernor.proposal(newOwner.address, period);
+        expect(prop.forVotes).to.be.eq(0);
 
         // allow voting
         for (let i = 0; i < 5; i++) {
@@ -185,7 +196,7 @@ describe("ReserveGovernor and Bootstrap process", function () {
         await time.increaseTo(prop.endTime.add(10));
         await reserveGovernor.settleVotes(newOwner.address);
 
-        // prop is passed
+        // prop is passed. governance is locked and all ownership of contracts transferred
         const govLocked = await reserveGovernor.governanceLocked();
         expect(govLocked).to.be.true;
 
