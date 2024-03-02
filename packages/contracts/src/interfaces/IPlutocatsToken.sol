@@ -14,7 +14,9 @@ interface IPlutocatsToken is IERC721 {
         uint256 joinTime;
     }
 
-    event PlutocatPurchased(uint256 indexed tokenId, uint256 price, IPlutocatsSeeder.Seed seed);
+    event PlutocatPurchased(
+        uint256 indexed tokenId, address indexed msgSender, uint256 price, IPlutocatsSeeder.Seed seed
+    );
     event ETHSent(address indexed to, uint256 amount);
     event DescriptorUpdated(address indexed newDescriptor);
     event SeederUpdated(address indexed newSeeder);
@@ -33,4 +35,5 @@ interface IPlutocatsToken is IERC721 {
     function setDescriptor(address descriptor) external;
     function setSeeder(address seeder) external;
     function setReservePrice(bool _enableReservePrice) external;
+    function getPrice() external returns (uint256);
 }

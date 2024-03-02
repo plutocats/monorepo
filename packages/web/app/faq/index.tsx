@@ -87,6 +87,31 @@ export default function FAQ() {
           </dl>
         </div>
       </div>
+      <div className="w-full grow flex flex-col justify-center items-center text-white mb-6">
+        <h3 className="text-xs">Audited By</h3>
+        <a target="_blank" href="https://code4rena.com/audits/2024-03-plutocats-invitational">
+          <img className="max-w-[12vw] block" src="/static/code4rena-logo.png" />
+        </a>
+      </div>
+      <nav className="items-center justify-center w-full flex text-white pb-12">
+        <ul className="flex space-x-8">
+          <li>
+            <a className="hover:underline" href="https://github.com/plutocats/monorepo" target="_blank">
+              GitHub
+            </a>
+          </li>
+          <li>
+            <a className="hover:underline" href="https://twitter.com/plutocatswtf" target="_blank">
+              Twitter
+            </a>
+          </li>
+          <li>
+            <a className="hover:underline" href="https://discord.gg/zdr66ETpSa" target="_blank">
+              Discord
+            </a>
+          </li>
+        </ul>
+      </nav>
     </section>
   );
 }

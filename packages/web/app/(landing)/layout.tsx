@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import FAQ from "../faq";
 import "../globals.css";
+import { RainbowWrapper } from "../layout/rainbowWrapper";
 
 export const metadata: Metadata = {
   title: "Plutocats",
@@ -16,8 +17,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${GeistSans.className} overscroll-none`}>
-        <div className="flex min-h-screen flex-col items-center justify-center">{children}</div>
-        <FAQ />
+        <RainbowWrapper>
+          <div className="flex min-h-screen flex-col items-center justify-center">{children}</div>
+          <FAQ />
+        </RainbowWrapper>
       </body>
     </html>
   );

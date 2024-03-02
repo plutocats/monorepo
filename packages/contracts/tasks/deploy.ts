@@ -32,6 +32,14 @@ task('deploy', 'Deploys NFTDescriptor, PlutocatsDescriptor, PlutocatsSeeder, and
         types.boolean,
     )
     .setAction(async ({ autodeploy, includepredeploy, mintStart, silent, blastpoints, blastpointsoperator }, { ethers }) => {
+        if (!silent) {
+            console.log(`
+        
+        ===deploy script===\n<includepredeploy>: ${includepredeploy}\nbp: ${blastpoints}\nbpo: ${blastpointsoperator}
+        
+        `);
+        }
+
         const PLUTOCATS_ART_NONCE_OFFSET = includepredeploy ? 5 : 4;
         const PLUTOCATS_RESERVE_NONCE_OFFSET = includepredeploy ? 9 : 8;
         const PLUTOCATS_RESERVE_GOVERNOR_NONCE_OFFSET = includepredeploy ? 10 : 9;

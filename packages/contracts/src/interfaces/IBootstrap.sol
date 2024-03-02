@@ -46,6 +46,7 @@ interface IBootstrap {
     error InvalidProposal();
     error ProposalVoting();
     error InvalidSupport();
+    error AlreadyProposedThisPeriod();
 
     event ProposalCreated(address indexed newOwner, uint256 startBlock, uint256 endTime, uint256 quorum);
     event VoteCast(address indexed voter, address indexed newOwner, uint8 support, uint256 votes);

@@ -43,7 +43,7 @@ contract PlutocatsToken is IPlutocatsToken, ERC721Checkpointable, LinearVRGDA, O
     mapping(uint256 => Contribution) internal contributions;
 
     // IPFS content hash of contract-level metadata.
-    string private _contractURIHash = "TODO";
+    string private _contractURIHash = "QmYK3uptbXYQJX26TKUeYDBYHDhy7kPbYPmBHcZRaEqh1g";
 
     /// The address of the pre-deployed Blast contract.
     address public constant BLAST_PREDEPLOY_ADDRESS = 0x4300000000000000000000000000000000000002;
@@ -140,7 +140,7 @@ contract PlutocatsToken is IPlutocatsToken, ERC721Checkpointable, LinearVRGDA, O
         _mint(address(0), _to, _catId);
         contributions[_catId] = Contribution({amount: msg.value, joinTime: block.timestamp});
 
-        emit PlutocatPurchased(_catId, msg.value, seed);
+        emit PlutocatPurchased(_catId, msg.sender, msg.value, seed);
 
         return _catId;
     }

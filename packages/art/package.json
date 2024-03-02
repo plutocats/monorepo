@@ -1,9 +1,11 @@
 {
-  "name": "art",
+  "name": "plutocats-art",
   "version": "1.0.0",
-  "description": "plutocats assets",
-  "main": "index.ts",
+  "description": "plutocats art assets",
+  "main": "./dist/index.js",
+  "private": true,
   "scripts": {
+    "build": "rm -rf ./dist && tsc",
     "generate": "npx tsx ./scripts/generatePNGs.ts",
     "encode": "npx tsx ./scripts/encode.ts",
     "populateGallery": "npx tsx ./scripts/populateGallery.ts"

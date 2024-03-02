@@ -1,7 +1,7 @@
 import chai from 'chai';
 import { ethers, run } from 'hardhat';
 import { solidity } from 'ethereum-waffle';
-import { PlutocatsToken, PlutocatsReserve } from '../../typechain';
+import { PlutocatsToken, PlutocatsReserve, MarketBuyer } from '../../typechain';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 import { time } from "@nomicfoundation/hardhat-network-helpers";
 
@@ -13,6 +13,7 @@ const ONE_HUNDRED_DAYS = 60 * 60 * 24 * 100;
 describe("Token contract", function () {
     let plutocatsToken: PlutocatsToken;
     let plutocatsReserve: PlutocatsReserve;
+    let marketBuyer: MarketBuyer;
     let wallet: SignerWithAddress;
 
     beforeEach(async function () {
@@ -38,6 +39,10 @@ describe("Token contract", function () {
             plutocatsDescriptor: contracts.PlutocatsDescriptor.address,
             silent: true,
         });
+
+        const marketBuyerFactory = await ethers.getContractFactory('MarketBuyer', deployer);
+        const marketBuyerContract = await marketBuyerFactory.deploy(plutocatsToken.address);
+        marketBuyer = marketBuyerContract;
     });
 
     it("It should mint and render a proper tokenURI", async function () {
@@ -125,5 +130,36 @@ describe("Token contract", function () {
         await expect(plutocatsToken.setSeeder(s1.address)).to.not.be.reverted;
         await expect(plutocatsToken.setDescriptor(s1.address)).to.not.be.reverted;
         await expect(plutocatsToken.setContractURIHash("was-here")).to.not.be.reverted;
+    });
+
+    it('Market Buyer mint to caller and refund excess eth sent', async function () {
+        // should revert if not enough eth sent
+        const price = await plutocatsToken.getPrice();
+        await expect(marketBuyer.connect(wallet).buy({ value: price.div(2) })).to.be.revertedWith("payment too low");
+
+        const balBefore = await ethers.provider.getBalance(wallet.address);
+
+        // can pass excess and mint
+        const excess = price.mul(20);
+        const tx = await marketBuyer.connect(wallet).buy({ value: excess });
+        const receipt = await tx.wait();
+        const minted = receipt.events?.find(e => e.event === 'Minted');
+        expect(minted?.args?.[1]).to.eq(wallet.address);
+
+        const tokenId = minted?.args?.[0];
+        const mintedPrice = minted?.args?.[2];
+
+        /// ensure we only spent the token price
+        const balAfter = await ethers.provider.getBalance(wallet.address);
+        const cumulativeCost = mintedPrice.add(receipt.gasUsed.mul(receipt.effectiveGasPrice));
+        expect(balAfter).to.eq(balBefore.sub(cumulativeCost));
+
+        // ensure nft was transfered back to buyer
+        const ownerOf = await plutocatsToken.ownerOf(tokenId);
+        expect(ownerOf).to.eq(wallet.address);
+
+        /// market buyer should not have excess eth
+        const balMarketBuyer = await ethers.provider.getBalance(marketBuyer.address);
+        expect(balMarketBuyer).to.eq(0);
     });
 });

@@ -43,6 +43,7 @@ contract ReserveGovernor is IBootstrap, Ownable {
 
     /// The current period of voting.
     uint256 public proposalPeriod;
+    mapping(uint256 => address) public proposedForPeriod;
 
     /// Modifier to handle disabling the contract if governance is locked.
     modifier governanceNotLocked() {
@@ -70,6 +71,11 @@ contract ReserveGovernor is IBootstrap, Ownable {
     function propose(address _newOwner) external onlyOwner governanceNotLocked {
         uint256 startBlock = block.number;
         uint256 endTime = block.timestamp + 7 days;
+
+        if (proposedForPeriod[proposalPeriod] != address(0)) {
+            revert AlreadyProposedThisPeriod();
+        }
+        proposedForPeriod[proposalPeriod] = _newOwner;
 
         Proposal storage p = proposed[_newOwner][proposalPeriod];
         p.startBlock = startBlock;
@@ -109,7 +115,7 @@ contract ReserveGovernor is IBootstrap, Ownable {
         }
 
         // snapshot for voting power taken at the start of the proposal
-        uint256 votes = votingToken.getPriorVotes(msg.sender, p.startBlock);
+        uint256 votes = votingToken.getPriorVotes(msg.sender, p.startBlock - 1);
         if (_support == 1) {
             p.forVotes += votes;
         }
@@ -135,7 +141,7 @@ contract ReserveGovernor is IBootstrap, Ownable {
             revert InvalidProposal();
         }
 
-        if (block.timestamp < p.endTime) {
+        if (block.timestamp <= p.endTime) {
             revert ProposalVoting();
         }
 

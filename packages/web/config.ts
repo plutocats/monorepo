@@ -1,0 +1,1 @@
+export const explorerBaseURL = process.env.NEXT_PUBLIC_ENV === "production" ? "https://blastscan.io/" : "https://testnet.blastscan.io/";
