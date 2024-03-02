@@ -6,6 +6,7 @@ import { BsDiscord, BsTwitterX } from "react-icons/bs";
 import localFont from "next/font/local";
 import Pinwheel from "./pinwheel";
 import Header from "../layout/header";
+import Link from "next/link";
 
 const microChat = localFont({ src: "../fonts/Micro_Chat.ttf" });
 
@@ -51,13 +52,13 @@ export default function Home() {
           </a>
         </div>
       </div>
-      <div className="absolute w-full h-full -top-16 left-1" style={{ opacity: "0.09" }}>
+      <div className="absolute w-full h-full -top-16 left-1" style={{ opacity: "0.09", transform: "scale(1.4)" }}>
         <Pinwheel />
       </div>
       <div className="-translate-y-5 sm:-translate-y-10 flex flex-col gap-6 prose">
         <div className="flex flex-col mx-auto max-w-xl">
           <div className="flex items-center gap-1 mx-auto my-1 z-30 select-none text-sm">
-            Coming to
+            Exclusively on
             <a
               href="https://blast.io/en"
               target="_blank"
@@ -82,7 +83,13 @@ export default function Home() {
           <p className={`mt-5 sm:mt-6 text-xl sm:text-2xl text-center leading-relaxed`}>A crypto cat collective</p>
         </div>
         <div className="flex gap-4 mx-auto">
-          <a
+          <Link
+            className="rounded-full bg-black hover:bg-opacity-80 text-white px-12 py-4 font-semibold text-xl flex gap-2 items-center transition block w-full"
+            href="/mint"
+          >
+            Mint Now
+          </Link>
+          {/* <a
             target="_blank"
             className="rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 font-semibold text-lg  flex gap-2 items-center transition"
             href="https://discord.gg/zdr66ETpSa"
@@ -91,8 +98,8 @@ export default function Home() {
               <BsDiscord />
             </IconContext.Provider>
             Discord
-          </a>
-          <a
+          </a> */}
+          {/* <a
             target="_blank"
             className="rounded-lg bg-black hover:bg-opacity-80 text-white px-6 py-3 font-semibold text-lg flex gap-2 items-center transition"
             href="https://twitter.com/plutocatswtf"
@@ -101,7 +108,7 @@ export default function Home() {
               <BsTwitterX />
             </IconContext.Provider>
             Twitter
-          </a>
+          </a> */}
         </div>
         <div className="text-center select-none">
           <span className="relative font-semibold">WTF?</span>

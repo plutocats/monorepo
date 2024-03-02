@@ -25,30 +25,59 @@ const config: HardhatUserConfig = {
     },
   },
   networks: {
+    anvil: {
+      url: `http://127.0.0.1:8545`,
+      accounts: [
+        process.env.PRIVATE_KEY!,
+        process.env.POINTS_OP_PRIVATE_KEY!
+      ],
+      chainId: 168587773,
+      gasPrice: 1000000000,
+    },
     hardhat: {
       initialBaseFeePerGas: 0,
       forking: {
         enabled: true,
-        url: `https://sepolia.blast.io`,
-      }
+        url: 'https://sepolia.blast.io',
+        blockNumber: 2582350
+      },
     },
     blast_sepolia: {
       url: 'https://sepolia.blast.io',
-      accounts: [process.env.PRIVATE_KEY as string],
+      accounts: [
+        process.env.PRIVATE_KEY!,
+        process.env.POINTS_OP_PRIVATE_KEY!
+      ]
+    },
+    blast: {
+      url: 'https://sepolia.blast.io',
+      accounts: [
+        process.env.PRIVATE_KEY!,
+        process.env.POINTS_OP_PRIVATE_KEY!
+      ]
     },
   },
   // @ts-ignore
   etherscan: {
     apiKey: {
-      blast_sepolia: "blast_sepolia", // apiKey is not required, just set a placeholder
+      blast_sepolia: process.env.ETHERSCAN_API_KEY!,
+      blast: process.env.ETHERSCAN_API_KEY!,
     },
     customChains: [
       {
         network: "blast_sepolia",
         chainId: 168587773,
         urls: {
-          apiURL: "https://api.routescan.io/v2/network/testnet/evm/168587773/etherscan",
-          browserURL: "https://testnet.blastscan.io"
+          apiURL: "https://api-sepolia.blastscan.io/api",
+          browserURL: "https://sepolia.blastscan.io/"
+        }
+      },
+      {
+        network: "blast",
+        chainId: 81457,
+        urls: {
+          apiURL: "https://api.blastscan.io/api",
+          browserURL: "https://blastscan.io/"
         }
       }
     ]

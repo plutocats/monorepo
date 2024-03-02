@@ -73,6 +73,16 @@ describe("ReserveGovernor and Bootstrap process", function () {
         await expect(reserveGovernor.connect(s1).propose(wallet.address)).to.be.reverted;
         await expect(reserveGovernor.connect(wallet).propose(s1.address)).to.not.be.reverted;
 
+        // only one prop per period... should revert
+        await expect(reserveGovernor.connect(wallet).propose(s2.address)).to.be.reverted;
+
+
+        // settle created prop
+        const period = await reserveGovernor.proposalPeriod();
+        const prop = await reserveGovernor.proposal(s1.address, period);
+        await time.increaseTo(prop.endTime.add(10));
+        await reserveGovernor.connect(wallet).settleVotes(s1.address);
+
         await reserveGovernor.connect(wallet).transferOwnership(s1.address);
         await expect(reserveGovernor.connect(s1).propose(wallet.address)).to.not.be.reverted;
         await reserveGovernor.connect(s1).transferOwnership(wallet.address);
@@ -206,6 +216,11 @@ describe("ReserveGovernor and Bootstrap process", function () {
         expect(tOwner).to.be.eq(newOwner.address);
         const rOwner = await plutocatsReserve.owner();
         expect(rOwner).to.be.eq(newOwner.address);
+
+        // new owner can transfer ownership
+        expect(plutocatsReserve.connect(newOwner).transferOwnership(signers[0].address)).to.not.be.reverted;
+        expect(plutocatsToken.connect(newOwner).transferOwnership(signers[0].address)).to.not.be.reverted;
+        expect(plutocatsDescriptor.connect(newOwner).transferOwnership(signers[0].address)).to.not.be.reverted;
     });
 
     it('Vote snapshot is taken', async function () {

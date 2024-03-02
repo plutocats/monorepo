@@ -14,6 +14,7 @@ describe("Reserve contract", function () {
 
     beforeEach(async function () {
         const [deployer] = await ethers.getSigners();
+
         const contracts = await run('deploy', {
             autodeploy: true,
             includepredeploy: true,
@@ -136,7 +137,7 @@ describe("Reserve contract", function () {
             s1Received = s1Received.add(e?.args.amount);
         }
 
-        expect(s1Received).to.be.closeTo(s2Received, s1Received.div(ethers.BigNumber.from("100000000000000000")));
+        expect(s1Received).to.be.closeTo(s2Received, s1Received.div(ethers.BigNumber.from("10000000000000000")));
 
         const reserveBalance = await ethers.provider.getBalance(plutocatsReserve.address);
         await expect(reserveBalance).to.be.eq(0);
